@@ -39,7 +39,8 @@ def print_everything(text_list, number_of_lines=None):
     if number_of_lines:
         text_list = text_list[:number_of_lines]
     for text in text_list:
-        print(text)
+        # print(text)
+        pass
     print()
 
 
@@ -52,37 +53,84 @@ def text_to_class(text):
     return classes
 
 
-def print_text(classes_dict):
-    section_names = classes_dict['Tekst_TUSSENKOP']
+def find_proper_section_name(all_text, section_names, first_line):
+    for i, section_name in enumerate(section_names):
+        index = all_text.find(f"{section_name}{first_line}")
+        if index != -1:
+            section_names.pop(i)
+            return section_name, index
+    raise ValueError(f"Could not find proper section name for {first_line}")
+
+
+def show_content(classes_dict):
+    read = []
+
+    def append_and_print(line):
+        read.append(line)
+        print(line)
+
+    section_names = get_section_names(classes_dict)
     number_of_sections = len(section_names)
-    all = classes_dict['Basic-Graphics-Frame'][0]
+    all_text = classes_dict['Basic-Graphics-Frame'][0]
     paragraphs = classes_dict['Tekst_PLAT_VervolgAlinea']
+    first_paragraphs_lines = classes_dict['Tekst_PLAT_EersteAlinea']
     j = 0
 
+    for i in range(number_of_sections):
+        first_line = first_paragraphs_lines[i]
+        section_name, index = find_proper_section_name(all_text, section_names, first_line)
+        last_line = all_text[index - 100:index - 1]
+        if read and last_line in read[-1]:
+            print()
+            append_and_print(section_name)
+            append_and_print(first_line)
+            continue
+        while last_line not in paragraphs[j - 1]:
+            append_and_print(paragraphs[j])
+            j += 1
+        print()
+        append_and_print(section_name)
+        append_and_print(first_line)
+    while j < len(paragraphs):
+        append_and_print(paragraphs[j])
+        j += 1
+
+
+def print_text(classes_dict):
+    print_everything(classes_dict['Auteurs_AUTEURSNAAM'])
+    print_everything(classes_dict['Auteurs_AUTEURSVERMELDING'])
     print_everything(classes_dict['Kop-groot'])
     print_everything(classes_dict['Intro_INTRO'])
     print_everything(classes_dict['Intro_IN-HET-KORT-TXT'])
     print_everything(classes_dict["Tekst_PLAT_Initiaal_4r"])
 
-    for i in range(number_of_sections):
-        section_name = section_names[i]
-        first_line = classes_dict['Tekst_PLAT_EersteAlinea'][i]
-        index = all.find(f"{section_name}{first_line}")
-        index_range = (index - 100, index - 1)
-        prev_text = all[index_range[0]:index_range[1]]
-        while prev_text not in paragraphs[j - 1]:
-            print(paragraphs[j])
-            j += 1
-        print()
-        print(section_name)
-        print(first_line)
-    while j < len(paragraphs):
-        print(paragraphs[j])
-        j += 1
+    show_content(classes_dict)
+
+    print_everything(classes_dict["Literatuur_LITERATUURKOP"])
+    print_everything(classes_dict["Literatuur_LITERATUURTXT"])
+
+
+def get_section_names(classes_dict):
+    try:
+        section_names = classes_dict['Tekst_TUSSENKOP'] + classes_dict['Tekst_TUSSENKOPCURSIEF']
+    except KeyError:
+        section_names = classes_dict['Tekst_TUSSENKOP']
+    return section_names
 
 
 if __name__ == "__main__":
-    file_path = r"C:\Users\user\PycharmProjects\pythonProject8\Krzysztof\Beijenberg\000-000_Bleijenberg.epub"
-    reader = Scrapper(file_path)
-    classes_dict = reader.classes_dict
-    print_text(classes_dict)
+    file_paths = [
+        # r"C:\Users\user\PycharmProjects\pythonProject8\Krzysztof\Beijenberg\000-000_Bleijenberg.epub",
+        # r"C:\Users\user\PycharmProjects\pythonProject8\Krzysztof\Groot\543-545_Groot.epub",
+        # r"C:\Users\user\PycharmProjects\pythonProject8\Krzysztof\Pieters\000-000_Pieters.epub",
+        # r"C:\Users\user\PycharmProjects\pythonProject8\Krzysztof\Pomp\000-000_Pomp.epub",
+        # r"C:\Users\user\PycharmProjects\pythonProject8\Krzysztof\Sniekers\536-537_Sniekers2.epub",
+        # r"C:\Users\user\PycharmProjects\pythonProject8\Krzysztof\Thiel\540-542_Thiel.epub", #TODO
+        r"C:\Users\user\PycharmProjects\pythonProject8\Krzysztof\vVerschuer\000-000_vVerschuer.epub",
+        # r"C:\Users\user\PycharmProjects\pythonProject8\Krzysztof\Wisman\538-539_Wisman.epub"
+    ]
+    for file_path in file_paths:
+        print(file_path)
+        reader = Scrapper(file_path)
+        classes_dict = reader.classes_dict
+        print_text(classes_dict)
