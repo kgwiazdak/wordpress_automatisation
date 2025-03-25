@@ -39,7 +39,7 @@ def print_everything(text_list, number_of_lines=None):
     if number_of_lines:
         text_list = text_list[:number_of_lines]
     for text in text_list:
-        # print(text)
+        print(text)
         pass
     print()
 
@@ -76,6 +76,7 @@ def show_content(classes_dict):
     first_paragraphs_lines = classes_dict['Tekst_PLAT_EersteAlinea']
     j = 0
 
+    print_everything(classes_dict["Tekst_PLAT_Initiaal_4r"])
     for i in range(number_of_sections):
         first_line = first_paragraphs_lines[i]
         section_name, index = find_proper_section_name(all_text, section_names, first_line)
@@ -97,17 +98,26 @@ def show_content(classes_dict):
 
 
 def print_text(classes_dict):
-    print_everything(classes_dict['Auteurs_AUTEURSNAAM'])
-    print_everything(classes_dict['Auteurs_AUTEURSVERMELDING'])
+    show_authors(classes_dict)
+    show_title_and_intro(classes_dict)
+    show_content(classes_dict)
+    show_literature(classes_dict)
+
+
+def show_literature(classes_dict):
+    print_everything(classes_dict["Literatuur_LITERATUURKOP"])
+    print_everything(classes_dict["Literatuur_LITERATUURTXT"])
+
+
+def show_title_and_intro(classes_dict):
     print_everything(classes_dict['Kop-groot'])
     print_everything(classes_dict['Intro_INTRO'])
     print_everything(classes_dict['Intro_IN-HET-KORT-TXT'])
-    print_everything(classes_dict["Tekst_PLAT_Initiaal_4r"])
 
-    show_content(classes_dict)
 
-    print_everything(classes_dict["Literatuur_LITERATUURKOP"])
-    print_everything(classes_dict["Literatuur_LITERATUURTXT"])
+def show_authors(classes_dict):
+    print_everything(classes_dict['Auteurs_AUTEURSNAAM'])
+    print_everything(classes_dict['Auteurs_AUTEURSVERMELDING'])
 
 
 def get_section_names(classes_dict):
@@ -130,7 +140,6 @@ if __name__ == "__main__":
         # r"C:\Users\user\PycharmProjects\pythonProject8\Krzysztof\Wisman\538-539_Wisman.epub"
     ]
     for file_path in file_paths:
-        print(file_path)
         reader = Scrapper(file_path)
         classes_dict = reader.classes_dict
         print_text(classes_dict)
